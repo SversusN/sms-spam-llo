@@ -1,0 +1,57 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore backend dependencies
+        run: dotnet restore backend/SmsRecipes.Api/SmsRecipes.Api.csproj
+
+      - name: Publish backend
+        run: dotnet publish backend/SmsRecipes.Api/SmsRecipes.Api.csproj -c Release -o ./artifacts/backend --no-restore
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Copy frontend to artifacts
+        run: |
+          mkdir -p ./artifacts/frontend
+          cp -r ./frontend/dist/* ./artifacts/frontend/
+
+      - name: Zip artifacts
+        run: zip -r SmsRecipes.zip ./artifacts
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmsRecipes
+          path: SmsRecipes.zip
+          retention-days: 7
