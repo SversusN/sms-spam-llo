@@ -50,7 +50,6 @@ interface StoredFilters {
   patientSnils?: string;
   patientName?: string;
   isConsentGiven?: boolean;
-  period?: [string, string];
   pageSize?: number;
 }
 
@@ -69,9 +68,6 @@ const saveStoredFilters = (values: any, pageSize: number) => {
       patientSnils: values.patientSnils || undefined,
       patientName: values.patientName || undefined,
       isConsentGiven: values.isConsentGiven,
-      period: values.period?.length === 2
-        ? [values.period[0].format('YYYY-MM-DD'), values.period[1].format('YYYY-MM-DD')]
-        : undefined,
       pageSize,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
@@ -86,9 +82,6 @@ const buildInitialValues = (stored: StoredFilters | null) => {
     patientSnils: stored.patientSnils,
     patientName: stored.patientName,
     isConsentGiven: stored.isConsentGiven,
-    period: stored.period?.length === 2
-      ? [dayjs(stored.period[0]), dayjs(stored.period[1])]
-      : undefined,
   };
 };
 

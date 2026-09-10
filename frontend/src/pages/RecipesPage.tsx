@@ -41,7 +41,6 @@ const formatSnils = (value: string = ''): string => {
 };
 
 interface StoredFilters {
-  period?: [string, string];
   patientName?: string;
   patientPhone?: string;
   lsName?: string;
@@ -67,9 +66,6 @@ const loadStoredFilters = (): StoredFilters | null => {
 const saveStoredFilters = (values: any, pageSize: number) => {
   try {
     const toStore: StoredFilters = {
-      period: values.period?.length === 2
-        ? [values.period[0].format('YYYY-MM-DD'), values.period[1].format('YYYY-MM-DD')]
-        : undefined,
       patientName: values.patientName || undefined,
       patientPhone: values.patientPhone || undefined,
       lsName: values.lsName || undefined,
@@ -95,9 +91,8 @@ const buildInitialValues = (stored: StoredFilters | null) => {
   }
 
   return {
-    period: stored.period?.length === 2
-      ? [dayjs(stored.period[0]), dayjs(stored.period[1])]
-      : [defaultDateFrom, defaultDateTo],
+    // Период не сохраняем — всегда подставляем значения по умолчанию
+    period: [defaultDateFrom, defaultDateTo],
     patientName: stored.patientName,
     patientPhone: stored.patientPhone,
     lsName: stored.lsName,

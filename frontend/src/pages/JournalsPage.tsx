@@ -60,9 +60,7 @@ const saveStoredFilters = (queueValues: any, logsValues: any, pageSize: number) 
       if (values.status) result.status = values.status;
       if (values.individualSnils) result.individualSnils = values.individualSnils;
       if (values.recipeId) result.recipeId = values.recipeId;
-      if (values.period?.length === 2) {
-        result.period = [values.period[0].format('YYYY-MM-DD'), values.period[1].format('YYYY-MM-DD')];
-      }
+      // Период не сохраняем — при открытии страницы подставляются даты по умолчанию
       return result;
     };
 
@@ -82,12 +80,9 @@ const buildInitialValues = (stored: StoredFilters | null, tab: 'queue' | 'logs')
   const values = stored?.[tab];
   if (!values) return {};
 
-  return {
-    ...values,
-    period: values.period?.length === 2
-      ? [dayjs(values.period[0]), dayjs(values.period[1])]
-      : undefined,
-  };
+  // Период не восстанавливаем — старое сохранённое значение игнорируем
+  const { period: _ignoredPeriod, ...rest } = values;
+  return rest;
 };
 
 const JournalsPage: React.FC = () => {
