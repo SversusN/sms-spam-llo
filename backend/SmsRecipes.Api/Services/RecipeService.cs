@@ -41,7 +41,7 @@ SELECT
     SmsDate = COALESCE(RR.[SMS_DATE], (
         SELECT MAX(SL.[CreatedAt])
         FROM [SmsRecipesApp].[dbo].[SmsLog] SL (NOLOCK)
-        WHERE SL.[RecipeId] = R.[ID] AND SL.[UserGuid] = @UserGuid
+        WHERE SL.[RecipeId] = R.[ID] --AND SL.[UserGuid] = @UserGuid
     )),
     IndividualSnils = IND.INDIVIDUAL_SNILS,
     Program = PRG.[PROGRAM_SHORT_NAME],
@@ -117,9 +117,9 @@ WHERE
         {
             await appConn.OpenAsync();
             sentRecipeIds = (await appConn.QueryAsync<int>(
-                @"SELECT DISTINCT [RecipeId] FROM [SmsQueue] WHERE [UserGuid] = @UserGuid AND [Status] = 'Sent'
+                @"SELECT DISTINCT [RecipeId] FROM [SmsQueue] WHERE [Status] = 'Sent'
                   UNION
-                  SELECT DISTINCT [RecipeId] FROM [SmsLog] WHERE [UserGuid] = @UserGuid AND [Status] = 'Sent'",
+                  SELECT DISTINCT [RecipeId] FROM [SmsLog] WHERE [Status] = 'Sent'",
                 new { UserGuid = userGuid })).ToList();
         }
 
@@ -239,7 +239,7 @@ ORDER BY [INCOME_DATE] {orderDirection}";
                   SELECT [RecipeId], [Status],
                          ROW_NUMBER() OVER (PARTITION BY [RecipeId] ORDER BY [CreatedAt] DESC, [Id] DESC) AS rn
                   FROM [SmsQueue]
-                  WHERE [UserGuid] = @UserGuid AND [RecipeId] IN @RecipeIds
+                  WHERE  [RecipeId] IN @RecipeIds
               ) t WHERE rn = 1",
             new { UserGuid = userGuid, RecipeIds = recipeIds });
 
@@ -248,7 +248,7 @@ ORDER BY [INCOME_DATE] {orderDirection}";
                   SELECT [RecipeId], [Status], [DeliveryStatus],
                          ROW_NUMBER() OVER (PARTITION BY [RecipeId] ORDER BY [CreatedAt] DESC, [Id] DESC) AS rn
                   FROM [SmsLog]
-                  WHERE [UserGuid] = @UserGuid AND [RecipeId] IN @RecipeIds
+                  WHERE [RecipeId] IN @RecipeIds
               ) t WHERE rn = 1",
             new { UserGuid = userGuid, RecipeIds = recipeIds });
 
